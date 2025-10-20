@@ -1,0 +1,29 @@
+Created by: S. M. Riordan & W. R. J. Tomlinson
+
+This is a two-player platformer game for the UCFK4 using a scrolling LED matrix display,
+synchronised player readiness and win/loss detection via IR communication.
+    - The game is to played horizontally with the right side being UCFK4 TOP and left side UCFK4 BOTTOM.
+    - The map scrolls continuously from right to left, creating platforms at different heights.
+    - Each player controls a single pixel representing their character.
+    - If a player falls to the bottom row with no platform beneath them, they lose.
+    - If a player collides with the side of an approaching platform, they lose.
+    - The game gets faster each time the map loops.
+
+Controls:
+    Action:     Navswitch Direction:
+    Jump        North
+    Fall        South
+
+To initialise "Ready-Up" sequence with between players:
+    - Press "SW3" to display "LED1" ready indicator,
+    - Once both players are ready, the game starts!
+
+Once the game is over, the players will be returned to the "Ready-Up" screen.
+
+
+Statement of AI use:
+
+Portions of this project, including code structuring, function documentation, and gameplay description text, 
+were drafted with assistance from OpenAI’s ChatGPT. 
+All AI-generated content was reviewed, modified, and validated manually to ensure correctness and suitability 
+for this specific embedded platform.
