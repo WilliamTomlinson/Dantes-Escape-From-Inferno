@@ -1,0 +1,3 @@
+[submodule "fun-kit_api"]
+	path = fun-kit_api
+	url = https://eng-git.canterbury.ac.nz/rmc84/ence260-ucfk4.git
