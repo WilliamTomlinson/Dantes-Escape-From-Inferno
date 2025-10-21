@@ -9,7 +9,7 @@
 
 #include "level.h" /* Includes Level_t definition */ 
 #include "physics.h"
-#include "fixed_math.h"
+#include "math.h"
 
 #define MAX_STATIC_BODIES 32
 #define TILE_SIZE_PIXELS 8

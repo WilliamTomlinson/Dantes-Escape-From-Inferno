@@ -27,8 +27,8 @@ void playerInit(Player_t* player)
      player->roundSpeed = PLAYER_ROUND_SPEED_SCALE;
 
      DynamicBody_t* dynamicBody = &player->body;
-     FixedVector2D_t* transform = &dynamicBody->transform;
-     SimpleVector2D_t* collider = &dynamicBody->collider;
+     Vector2D_t* transform = &dynamicBody->transform;
+     Vector2D_t* collider = &dynamicBody->collider;
      MassiveBody_t* massBody = &dynamicBody->massBody;
      massiveBodyStopMotion(massBody);
 
@@ -55,7 +55,7 @@ void playerDeductHealth(Player_t* player, uint8_t penalty)
 
 void playerJump(Player_t* player)
 {
-     FixedVector2D_t jumpVector;
+     Vector2D_t jumpVector;
      jumpVector.x = FIXED_ZERO;
      jumpVector.y = PLAYER_JUMP_FORCE;
      massiveBodyApplyForce(&player->body.massBody, jumpVector);
@@ -122,8 +122,8 @@ CollisionSide_t playerOnWorldCollisionCheckAndResolve(Player_t* player)
      const uint8_t* bitMap = currentLevel->bitMap;
 
      DynamicBody_t* dynamicBody = &player->body;
-     SimpleVector2D_t*  collider = &dynamicBody->collider;
-     FixedVector2D_t* centerPosition = &dynamicBody->transform;
+     Vector2D_t*  collider = &dynamicBody->collider;
+     Vector2D_t* centerPosition = &dynamicBody->transform;
 
      Fixed_t xMin = FIXED_SUB(centerPosition->x, collider->x);
      Fixed_t xMax = FIXED_ADD(centerPosition->x, collider->x);

@@ -14,7 +14,7 @@ void massiveBodyApplyGForce(MassiveBody_t* body)
 }
 
 
-void massiveBodyApplyForce(MassiveBody_t* body, FixedVector2D_t force)
+void massiveBodyApplyForce(MassiveBody_t* body, Vector2D_t force)
 {
     body->netForce.x += force.x;
     body->netForce.y += force.y;
@@ -107,10 +107,10 @@ void dynamicOnStaticBodyResolveCollision(DynamicBody_t* dynamicBody, const Stati
         return;
     }
 
-    FixedVector2D_t* dynamicTransform = &dynamicBody->transform;
-    const SimpleVector2D_t*  dynamicCollider  = &dynamicBody->collider;
-    const FixedVector2D_t* staticTransform = &staticBody->transform;
-    const SimpleVector2D_t*  staticCollider  = &staticBody->collider;
+    Vector2D_t* dynamicTransform = &dynamicBody->transform;
+    const Vector2D_t*  dynamicCollider  = &dynamicBody->collider;
+    const Vector2D_t* staticTransform = &staticBody->transform;
+    const Vector2D_t*  staticCollider  = &staticBody->collider;
     Fixed_t combinedHalfWidths;
     Fixed_t combinedHalfHeights;
     

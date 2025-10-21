@@ -9,7 +9,7 @@
 
 #include <system.h>
 #include "physics.h"
-#include "fixed_vector_2d.h"
+#include "math.h"
 #include "world.h"
 
 typedef enum {

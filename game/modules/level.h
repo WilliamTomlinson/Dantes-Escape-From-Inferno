@@ -12,7 +12,7 @@
 #define MAX_LEVEL_LENGTH 32
 #define NUMBER_OF_LEVELS 1
 
-#include <system.h>
+#include "system.h"
 
 typedef struct {
     uint8_t number;

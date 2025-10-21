@@ -1,15 +1,14 @@
-/** @file   fixed_math.h
+/** @file   math.h
     @author W. R. J. Tomlinson
     @date   14 Oct 2025
-    @brief  Fixed-point math utilities using Q9.6 format (signed 16-bit).
-            Provides arithmetic, conversion, and comparison macros with a
-            numeric range of -512.0 to +511.984375 and a precision of 1/64.
+    @brief  A math module that implements fixed_point numbers and 2D vectors.
 */
 
-#ifndef FIXED_MATH_H
-#define FIXED_MATH_H
 
-#include <system.h>
+#ifndef MATH_H
+#define MATH_H
+
+#include "system.h"
 
 //==================================================================
 // 1. CORE DEFINITIONS
@@ -87,4 +86,52 @@ typedef int16_t Fixed_t;
 #define FIXED_ZERO         INT_TO_FIXED(0)      // Represents 0.0 (value = 0)
 #define FIXED_PI           FLOAT_TO_FIXED(3.14159f) // Represents PI (value = 804)
 
-#endif // FIXED_MATH_H
+
+//==================================================================
+// 6. VECTORS
+//==================================================================
+
+
+
+typedef struct {
+    Fixed_t x;
+    Fixed_t y;
+} Vector2D_t;
+
+
+/** Returns the dot product of 2 vectors.
+    @param vector1 a pointer to the first vector
+    @param vector2 a pointer to the second vector
+    @return the calculated dot product  */
+Fixed_t dotProduct(const Vector2D_t* vector1, const Vector2D_t* vector2);
+
+
+/** Adds the elements of 2 vectors and returns a new one.
+    @param vector1 pointer to the first vector
+    @param vector2 pointer to the second vector  */
+Vector2D_t vectorSum(const Vector2D_t* vector1, const Vector2D_t* vector2);
+
+
+/** Subtracts the elements of of two vectors and returns a new vector
+    @param vector1 pointer to the vector being subtracted from
+    @param vector2 pointer to the vector used for subtraction  */
+Vector2D_t vectorSub(const Vector2D_t* vector1, const Vector2D_t* vector2);
+
+
+/** Returns a scaled vector
+    @param vector a pointer to the vector being scaled
+    @param scalar the scaling factor for the vectors elements  */
+Vector2D_t fixedVectorScale(Vector2D_t* vector, const Fixed_t scalar);
+
+
+/** Returns a copy of the passed vector
+    @param vector a pointer to the vector that is being coppied  */
+Vector2D_t fixedVectorCopy(const Vector2D_t* vector);
+
+
+/** Returns the squared magnitude of a vector.
+    @param vector the vector that is having its magnitude squared  */
+Fixed_t fixedMagnitudeSquared(const Vector2D_t* vector);
+
+
+#endif /* MATH_H */

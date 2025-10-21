@@ -7,30 +7,28 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include "fixed_math.h"
-#include "fixed_vector_2d.h"
-#include "simple_vector_2d.h"
+#include "math.h"
 
 #define GRAVITY -10
 
 
 typedef struct {
     uint8_t mass;
-    FixedVector2D_t velocity;
-    FixedVector2D_t acceleration;
-    FixedVector2D_t netForce;
+    Vector2D_t velocity;
+    Vector2D_t acceleration;
+    Vector2D_t netForce;
 } MassiveBody_t;
 
 
 typedef struct {
-    FixedVector2D_t transform;
-    SimpleVector2D_t collider;
+    Vector2D_t transform;
+    Vector2D_t collider;
 } StaticBody_t;
 
 
 typedef struct {
-    FixedVector2D_t transform;
-    SimpleVector2D_t collider;
+    Vector2D_t transform;
+    Vector2D_t collider;
     MassiveBody_t massBody;
 } DynamicBody_t;
 
@@ -45,7 +43,7 @@ typedef enum {
 
 void massiveBodyApplyGForce(MassiveBody_t* body);
 
-void massiveBodyApplyForce(MassiveBody_t* body, FixedVector2D_t force);
+void massiveBodyApplyForce(MassiveBody_t* body, Vector2D_t force);
 
 void massiveBodyClearNetForce(MassiveBody_t* body);
 

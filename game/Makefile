@@ -1,101 +1,120 @@
 # File:   Makefile
 # Author: S. M. Riordan & W. R. J. Tomlinson
-# Date:   15/10/2025
+# Date:   15/10/2025 (Refactored for maintainability)
 # Descr:  Makefile for game
 
-# Definitions.
+# --- Configuration ---
+# Tools
 CC = avr-gcc
-CFLAGS = -mmcu=atmega32u2 -Os -Wall -Wstrict-prototypes -Wextra -g -I. -I../../utils -I../../fonts -I../../drivers -I../../drivers/avr
 OBJCOPY = avr-objcopy
 SIZE = avr-size
-DEL = rm
+RM = rm -rf
 
+# MCU and optimization settings
+MCU = atmega32u2
+OPTIMIZE = -Os
 
-# Default target.
-all: game.out
+# Name of the final output file (without extension)
+TARGET = game
 
+# --- Build Directories ---
+# All output files will be placed here
+BUILD_DIR = build
 
-# Compile: create object files from C source files.
-game.o: game.c ../../drivers/avr/ir_uart.h ../../drivers/avr/system.h ../../drivers/display.h ../../drivers/navswitch.h ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/pacer.h ../../utils/tinygl.h level.h world.h player.h screen.h
-	$(CC) -c $(CFLAGS) $< -o $@
+# --- Compiler and Linker Flags ---
+# Add all directories containing header files to the -I flags
+INCLUDE_DIRS = -I. \
+               -I../fun-kit_api/utils \
+               -I../fun-kit_api/fonts \
+               -I../fun-kit_api/drivers \
+               -I../fun-kit_api/drivers/avr \
+               -Imodules
 
-ir_uart.o: ../../drivers/avr/ir_uart.c ../../drivers/avr/ir_uart.h ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/avr/timer0.h ../../drivers/avr/usart1.h
-	$(CC) -c $(CFLAGS) $< -o $@
+# CFLAGS for compiling. -MMD -MP are for automatic dependency generation
+CFLAGS = -mmcu=$(MCU) $(OPTIMIZE) -Wall -Wstrict-prototypes -Wextra -g $(INCLUDE_DIRS) -MMD -MP
+# LDFLAGS for linking. Add libraries like -lm here
+LDFLAGS = -lm
 
-pio.o: ../../drivers/avr/pio.c ../../drivers/avr/pio.h ../../drivers/avr/system.h
-	$(CC) -c $(CFLAGS) $< -o $@
+# --- Source Files ---
+# List all your .c source files here.
+# This is the ONLY list you should ever need to edit.
+SRCS = \
+    game.c \
+    ../fun-kit_api/drivers/avr/ir_uart.c \
+    ../fun-kit_api/drivers/avr/pio.c \
+    ../fun-kit_api/drivers/avr/prescale.c \
+    ../fun-kit_api/drivers/avr/system.c \
+    ../fun-kit_api/drivers/avr/timer.c \
+    ../fun-kit_api/drivers/avr/timer0.c \
+    ../fun-kit_api/drivers/avr/usart1.c \
+    ../fun-kit_api/drivers/navswitch.c \
+    ../fun-kit_api/drivers/display.c \
+    ../fun-kit_api/drivers/ledmat.c \
+    ../fun-kit_api/utils/font.c \
+    ../fun-kit_api/utils/pacer.c \
+    ../fun-kit_api/utils/tinygl.c \
+    modules/level.c \
+    modules/math.c \
+    modules/physics.c \
+    modules/player.c \
+    modules/screen.c \
+    modules/world.c
 
-prescale.o: ../../drivers/avr/prescale.c ../../drivers/avr/prescale.h ../../drivers/avr/system.h
-	$(CC) -c $(CFLAGS) $< -o $@
+# --- Automatic File Generation ---
+# Automatically create a list of object files in the BUILD_DIR
+OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
+# Automatically create a list of dependency files
+DEPS = $(OBJS:.o=.d)
+# Define the final executable and hex file paths
+EXECUTABLE = $(BUILD_DIR)/$(TARGET).out
+HEX_FILE = $(BUILD_DIR)/$(TARGET).hex
 
-system.o: ../../drivers/avr/system.c ../../drivers/avr/system.h
-	$(CC) -c $(CFLAGS) $< -o $@
+# Tell make where to find source files
+VPATH = $(sort $(dir $(SRCS)))
 
-timer.o: ../../drivers/avr/timer.c ../../drivers/avr/system.h ../../drivers/avr/timer.h
-	$(CC) -c $(CFLAGS) $< -o $@
+# --- Main Targets ---
 
-timer0.o: ../../drivers/avr/timer0.c ../../drivers/avr/bits.h ../../drivers/avr/prescale.h ../../drivers/avr/system.h ../../drivers/avr/timer0.h
-	$(CC) -c $(CFLAGS) $< -o $@
+# Default target: build the executable and the hex file
+.PHONY: all
+all: $(EXECUTABLE) $(HEX_FILE)
 
-usart1.o: ../../drivers/avr/usart1.c ../../drivers/avr/system.h ../../drivers/avr/usart1.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-navswitch.o: ../../drivers/navswitch.c ../../drivers/avr/delay.h ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/navswitch.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-pacer.o: ../../utils/pacer.c ../../drivers/avr/system.h ../../drivers/avr/timer.h ../../utils/pacer.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/font.h ../../utils/tinygl.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-display.o: ../../drivers/display.c ../../drivers/avr/system.h ../../drivers/display.h ../../drivers/ledmat.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-ledmat.o: ../../drivers/ledmat.c ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../drivers/ledmat.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-fixed_vector_2d.o: fixed_vector_2d.c ../../drivers/avr/system.h fixed_vector_2d.h fixed_math.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-simple_vector_2d.o: simple_vector_2d.c ../../drivers/avr/system.h simple_vector_2d.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-physics.o: physics.c ../../drivers/avr/system.h physics.h simple_vector_2d.h fixed_vector_2d.h fixed_math.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-level.o: level.c ../../drivers/avr/system.h level.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-world.o: world.c ../../drivers/avr/system.h fixed_math.h world.h physics.h level.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-player.o: player.c ../../drivers/avr/system.h player.h physics.h world.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-screen.o: screen.c ../../drivers/avr/system.h ../../utils/pacer.h ../../utils/tinygl.h ../../drivers/avr/pio.h level.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-
-
-
-# Link: create ELF output file from object files.
-game.out: game.o system.o screen.o player.o world.o level.o physics.o simple_vector_2d.o fixed_vector_2d.o ir_uart.o pio.o prescale.o timer.o timer0.o usart1.o navswitch.o font.o pacer.o tinygl.o display.o ledmat.o
-	$(CC) $(CFLAGS) $^ -o $@ -lm
+# Link the executable from all the object files
+$(EXECUTABLE): $(OBJS)
+	@echo "Linking..."
+	$(CC) -mmcu=$(MCU) $(OBJS) -o $@ $(LDFLAGS)
+	@echo "Size of $(EXECUTABLE):"
 	$(SIZE) $@
 
+# Create the .hex file from the .out file
+$(HEX_FILE): $(EXECUTABLE)
+	@echo "Creating HEX file..."
+	$(OBJCOPY) -O ihex $< $@
 
-# Target: clean project.
-.PHONY: clean
-clean: 
-	-$(DEL) *.o *.out *.hex
-
-
-# Target: program project.
+# Program the device
 .PHONY: program
-program: game.out
-	$(OBJCOPY) -O ihex game.out game.hex
-	dfu-programmer atmega32u2 erase; dfu-programmer atmega32u2 flash game.hex; dfu-programmer atmega32u2 start
+program: $(HEX_FILE)
+	@echo "Programming device..."
+	dfu-programmer $(MCU) erase
+	dfu-programmer $(MCU) flash $(HEX_FILE)
+	dfu-programmer $(MCU) start
+
+# Clean the build directory
+.PHONY: clean
+clean:
+	@echo "Cleaning project..."
+	-$(RM) $(BUILD_DIR)
+
+# --- Generic Compilation Rule ---
+# This single rule compiles any .c file into a .o file in the build directory
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
+	@echo "Compiling $<..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# This rule creates the build directory if it doesn't exist
+$(BUILD_DIR):
+	@mkdir -p $@
+
+# --- Include Auto-Generated Dependencies ---
+# This will include all the .d files created by the compiler.
+# The leading '-' tells make not to complain if the files don't exist yet.
+-include $(DEPS)```
