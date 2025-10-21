@@ -1,0 +1,5 @@
+# Ignore clangd cache directory
+game/.cache/
+
+# Ignore files made during make
+game/build/
