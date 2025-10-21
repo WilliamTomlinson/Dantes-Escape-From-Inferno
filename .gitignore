@@ -3,3 +3,6 @@ game/.cache/
 
 # Ignore files made during make
 game/build/
+
+# Ignore compile commands
+game/compile_commands.json
