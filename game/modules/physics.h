@@ -13,11 +13,11 @@
 
 
 typedef struct {
-    uint8_t mass;
-    Vector2D_t velocity;
-    Vector2D_t acceleration;
-    Vector2D_t netForce;
-} MassiveBody_t;
+    uint8_t m;
+    Vector2D_t v;
+    Vector2D_t a;
+    Vector2D_t netF;
+} RigidBody_t;
 
 
 typedef struct {
@@ -27,9 +27,8 @@ typedef struct {
 
 
 typedef struct {
-    Vector2D_t transform;
-    Vector2D_t collider;
-    MassiveBody_t massBody;
+    StaticBody_t statik;
+    RigidBody_t rigid;
 } DynamicBody_t;
 
 typedef enum {
@@ -41,27 +40,27 @@ typedef enum {
 } CollisionSide_t;
  
 
-void massiveBodyApplyGForce(MassiveBody_t* body);
+void applyRigidGForce(RigidBody_t* rigid);
 
-void massiveBodyApplyForce(MassiveBody_t* body, Vector2D_t force);
+void applyRigidForce(RigidBody_t* rigid, Vector2D_t force);
 
-void massiveBodyClearNetForce(MassiveBody_t* body);
+void clearRigidNetForce(RigidBody_t* rigid);
 
-void massiveBodyUpdateAcceleration(MassiveBody_t* body);
+void updateRigidAcceleration(RigidBody_t* rigid);
 
-void massiveBodyUpdateVelocity(MassiveBody_t* body);
+void updateRigidVelocity(RigidBody_t* rigid);
 
-void massiveBodyUpdate(MassiveBody_t* body);
+void updateRigid(RigidBody_t* rigid);
 
-void massiveBodyStopMotion(MassiveBody_t* body);
+void stopRigidMotion(RigidBody_t* rigid);
 
-void dynamicBodyUpdate(DynamicBody_t* body);
+void updateDynamic(DynamicBody_t* dynamic);
 
 /**
  * Checks for collision between two square colliders using fixed-point math.
  * @return The side of collision FROM THE PERSPECTIVE OF OBJECT A.
  */
-CollisionSide_t dynamicOnStaticBodyCollisionCheck(const DynamicBody_t* dynamicBody, const StaticBody_t* staticBody);
+CollisionSide_t collisionCheck(const StaticBody_t* statikA, const StaticBody_t* statikB);
 
 /**
  * @brief Resolves an AABB collision by moving the dynamic body so it is perfectly
@@ -71,7 +70,7 @@ CollisionSide_t dynamicOnStaticBodyCollisionCheck(const DynamicBody_t* dynamicBo
  * @param body2 A pointer to the static body to resolve against.
  * @param side The side of body1 that was hit (e.g., COLLISION_TOP means body2 is at body1's top).
  */
-void dynamicOnStaticBodyResolveCollision(DynamicBody_t* body1, const StaticBody_t* body2, CollisionSide_t side);
+void collisionResolver(StaticBody_t* statikA, const StaticBody_t* statikB, CollisionSide_t side);
 
 
 #endif /* PHYSICS_H */

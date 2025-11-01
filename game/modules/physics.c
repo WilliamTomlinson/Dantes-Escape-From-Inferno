@@ -8,59 +8,68 @@
 
 const Fixed_t deltaTime = INT_TO_FIXED(1 / 100);
 
-void massiveBodyApplyGForce(MassiveBody_t* body)
-{
-    body->netForce.y += INT_TO_FIXED(body->mass * GRAVITY);
+void applyRigidGForce(RigidBody_t* rigid) {
+    rigid->netF.y += INT_TO_FIXED(rigid->m * GRAVITY);
 }
 
 
-void massiveBodyApplyForce(MassiveBody_t* body, Vector2D_t force)
-{
-    body->netForce.x += force.x;
-    body->netForce.y += force.y;
+void applyRigidForce(RigidBody_t* rigid, Vector2D_t force) {
+    rigid->netF.x += force.x;
+    rigid->netF.y += force.y;
 }
 
-void massiveBodyClearNetForce(MassiveBody_t* body)
-{
-    body->netForce.x = FIXED_ZERO;
-    body->netForce.y = FIXED_ZERO;
+
+void clearRigidNetForce(RigidBody_t* rigid) {
+    rigid->netF.x = FIXED_ZERO;
+    rigid->netF.y = FIXED_ZERO;
 }
 
-void massiveBodyUpdateAcceleration(MassiveBody_t* body) 
+
+void clearRigidAcceleration(RigidBody_t* rigid)
 {
-    body->acceleration.x = body->netForce.x / body->mass;
-    body->acceleration.y = body->netForce.y / body->mass;
+    rigid->a.x = FIXED_ZERO;
+    rigid->a.y = FIXED_ZERO;
 }
 
-void massiveBodyUpdateVelocity(MassiveBody_t* body)
-{
-    body->velocity.x += body->acceleration.x * deltaTime;
-    body->velocity.y += body->acceleration.y * deltaTime;
+
+void clearRigidVelocity(RigidBody_t* rigid) {
+    rigid->v.x = FIXED_ZERO;
+    rigid->v.y = FIXED_ZERO;
 }
 
-void massiveBodyUpdate(MassiveBody_t* body)
-{
-    massiveBodyClearNetForce(body);
-    massiveBodyUpdateAcceleration(body);
-    massiveBodyUpdateVelocity(body);
-    massiveBodyClearNetForce(body);
+
+void updateRigidAcceleration(RigidBody_t* rigid) {
+    rigid->a.x = rigid->netF.x / rigid->m;
+    rigid->a.y = rigid->netF.y / rigid->m;
 }
 
-void massiveBodyStopMotion(MassiveBody_t* body)
-{
-    body->acceleration.x = FIXED_ZERO;
-    body->acceleration.y = FIXED_ZERO;
-    body->velocity.x = FIXED_ZERO;
-    body->velocity.y = FIXED_ZERO;
-    body->netForce.x = FIXED_ZERO;
-    body->netForce.y = FIXED_ZERO;
+
+void updateRigidVelocity(RigidBody_t* rigid) {
+    rigid->v.x += rigid->a.x * deltaTime;
+    rigid->v.y += rigid->a.y * deltaTime;
 }
 
-void dynamicBodyUpdate(DynamicBody_t* body)
-{
-    massiveBodyUpdate(&body->massBody);
-    body->transform.x += body->massBody.velocity.x * deltaTime;
-    body->transform.y += body->massBody.velocity.y * deltaTime;
+
+void updateRigid(RigidBody_t* rigid) {
+    updateRigidAcceleration(rigid);
+    updateRigidVelocity(rigid);
+    clearRigidNetForce(rigid);
+}
+
+
+void stopRigidMotion(RigidBody_t* rigid) {
+    clearRigidAcceleration(rigid);
+    clearRigidVelocity(rigid);
+    clearRigidNetForce(rigid);
+}
+
+
+void dynamicBodyUpdate(DynamicBody_t* body) {
+    RigidBody_t* rigid = &body->rigid;
+    StaticBody_t* statik = &body->statik;
+    updateRigid(rigid);
+    statik->transform.x += body->rigid.v.x * deltaTime;
+    statik->transform.y += body->rigid.v.y * deltaTime;
 }
 
 
@@ -68,13 +77,13 @@ void dynamicBodyUpdate(DynamicBody_t* body)
  * Checks for collision between two square colliders using fixed-point math.
  * @return The side of collision FROM THE PERSPECTIVE OF OBJECT A.
  */
-CollisionSide_t dynamicOnStaticBodyCollisionCheck(const DynamicBody_t* dynamicBody, const StaticBody_t* staticBody)
-{
+CollisionSide_t collisionCheck(const StaticBody_t* statikA, const StaticBody_t* statikB) {
     // Calculate distance and combined radii using fixed-point operations
-    Fixed_t dx = FIXED_SUB(dynamicBody->transform.x, staticBody->transform.x);
-    Fixed_t dy = FIXED_SUB(dynamicBody->transform.y, staticBody->transform.y);
-    Fixed_t combinedHalfWidths = FIXED_ADD(dynamicBody->collider.x, staticBody->collider.x);
-    Fixed_t combinedHalfHeights = FIXED_ADD(dynamicBody->collider.y, staticBody->collider.y);
+    Fixed_t dx = FIXED_SUB(statikA->transform.x, statikB->transform.x);
+    Fixed_t dy = FIXED_SUB(statikA->transform.y, statikB->transform.y);
+
+    Fixed_t combinedHalfWidths  = FIXED_ADD(statikA->collider.x, statikB->collider.x);
+    Fixed_t combinedHalfHeights = FIXED_ADD(statikA->collider.y, statikB->collider.y);
 
     // Overlap check using fixed-point comparison and absolute value
     if (FIXED_GT(FIXED_ABS(dx), combinedHalfWidths) || FIXED_GT(FIXED_ABS(dy), combinedHalfHeights)) {
@@ -101,35 +110,41 @@ CollisionSide_t dynamicOnStaticBodyCollisionCheck(const DynamicBody_t* dynamicBo
  * @param body2 A pointer to the static body to resolve against.
  * @param side The side of body1 that was hit (e.g., COLLISION_TOP means body2 is at body1's top).
  */
-void dynamicOnStaticBodyResolveCollision(DynamicBody_t* dynamicBody, const StaticBody_t* staticBody, CollisionSide_t side)
-{
+void collisionResolver(StaticBody_t* statikA, const StaticBody_t* statikB, CollisionSide_t side) {
+    /* safety check */
     if (side == COLLISION_NONE) {
         return;
     }
+    /* initialising useful data */
+          Vector2D_t* transformA = &statikA->transform;
+    const Vector2D_t* transformB = &statikB->transform;
+    const Vector2D_t* colliderA  = &statikA->collider;
+    const Vector2D_t* colliderB  = &statikB->collider;
 
-    Vector2D_t* dynamicTransform = &dynamicBody->transform;
-    const Vector2D_t*  dynamicCollider  = &dynamicBody->collider;
-    const Vector2D_t* staticTransform = &staticBody->transform;
-    const Vector2D_t*  staticCollider  = &staticBody->collider;
+    /* defining for later use */
     Fixed_t combinedHalfWidths;
     Fixed_t combinedHalfHeights;
     
+    /* the collision resolver */
+
+    // TODO: this does not work properly
+
     switch (side) {
         case COLLISION_TOP:
-            combinedHalfHeights = FIXED_ADD(dynamicCollider->y, staticCollider->y);
-            dynamicTransform->y = FIXED_ADD(staticTransform->y, combinedHalfHeights);
+            combinedHalfHeights = FIXED_ADD(colliderA->y, colliderB->y);
+            transformA->y = FIXED_ADD(transformB->y, combinedHalfHeights);
             break;
         case COLLISION_BOTTOM:
-            combinedHalfHeights = FIXED_ADD(dynamicCollider->y, staticCollider->y);
-            dynamicTransform->y = FIXED_SUB(staticTransform->y, combinedHalfHeights);
+            combinedHalfHeights = FIXED_ADD(colliderA->y, colliderB->y);
+            transformA->y = FIXED_SUB(transformB->y, combinedHalfHeights);
             break;
         case COLLISION_RIGHT:
-            combinedHalfWidths = FIXED_ADD(dynamicCollider->x, staticCollider->x);
-            dynamicTransform->x = FIXED_SUB(staticTransform->x, combinedHalfWidths);
+            combinedHalfWidths = FIXED_ADD(colliderA->x, colliderB->x);
+            transformA->x = FIXED_SUB(transformB->x, combinedHalfWidths);
             break;
         case COLLISION_LEFT:
-            combinedHalfWidths = FIXED_ADD(dynamicCollider->x, staticCollider->x);
-            dynamicTransform->x = FIXED_ADD(staticTransform->x, combinedHalfWidths);
+            combinedHalfWidths = FIXED_ADD(colliderA->x, colliderB->x);
+            transformA->x = FIXED_ADD(transformB->x, combinedHalfWidths);
             break;
         case COLLISION_NONE:
             break;
