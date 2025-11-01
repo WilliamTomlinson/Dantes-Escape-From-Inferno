@@ -87,7 +87,7 @@ CollisionSide_t collisionCheck(const StaticBody_t* statikA, const StaticBody_t* 
 
     // Overlap check using fixed-point comparison and absolute value
     if (FIXED_GT(FIXED_ABS(dx), combinedHalfWidths) || FIXED_GT(FIXED_ABS(dy), combinedHalfHeights)) {
-    return COLLISION_NONE;
+    return NO_COLLISION;
     }
 
     // Calculate penetration depth (overlap)
@@ -96,9 +96,9 @@ CollisionSide_t collisionCheck(const StaticBody_t* statikA, const StaticBody_t* 
 
     // Determine the side of collision by the smallest overlap
     if (FIXED_LT(xOverlap, yOverlap)) {
-        return (FIXED_GT(dx, FIXED_ZERO)) ? COLLISION_LEFT : COLLISION_RIGHT;
+        return (FIXED_GT(dx, FIXED_ZERO)) ? LEFT_COLLISION: RIGHT_COLLISION;
     } else {
-        return (FIXED_GT(dy, FIXED_ZERO)) ? COLLISION_BOTTOM : COLLISION_TOP;
+        return (FIXED_GT(dy, FIXED_ZERO)) ? BOTTOM_COLLISION : TOP_COLLISION;
     }
 }
 

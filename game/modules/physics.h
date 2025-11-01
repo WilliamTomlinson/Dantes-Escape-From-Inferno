@@ -32,11 +32,11 @@ typedef struct {
 } DynamicBody_t;
 
 typedef enum {
-    COLLISION_NONE,
-    COLLISION_TOP,
-    COLLISION_BOTTOM,
-    COLLISION_LEFT,
-    COLLISION_RIGHT
+    NO_COLLISION,
+    BOTTOM_COLLISION,
+    TOP_COLLISION,
+    LEFT_COLLISION,
+    RIGHT_COLLISION
 } CollisionSide_t;
  
 
