@@ -6,77 +6,91 @@
 
 #include "player.h"
 #include "math.h"
+#include "physics.h"
 
+/* REQUIRES FINE TUNING ON WORKING BUILD */
 #define PLAYER_SPEED 1
 #define PLAYER_MASS 1
 #define PLAYER_JUMP_FORCE 1
 #define PLAYER_ROUND_SPEED_SCALE 1
+
+/* Change these to alter dificulty */
 #define PLAYER_STARTING_LIVES 3
 #define PLAYER_OUT_OF_BOUNDS_PENALTY 2
 #define PLAYER_COLLISION_PENALTY 1
-#define PLAYER_SIZE TILE_SIZE_PIXELS
+
+/* Starting positions */
 #define PLAYER_START_X_POSITION 24
 #define PLAYER_START_Y_POSITION 24
 
-static uint8_t gameRound = 1;
+/* Player size */
+#define PLAYER_HEIGHT 8
+#define PLAYER_WIDTH  8
 
 void playerInit(Player_t* player)
 {
-     gameRound = 1;
+     /* Setting player health and state */
      player->health = PLAYER_STARTING_LIVES;
-     player->state = AIRBORNE;
-     player->roundSpeed = PLAYER_ROUND_SPEED_SCALE;
+     player->state  = WAIT;
 
-     DynamicBody_t* dynamicBody = &player->body;
-     Vector2D_t* transform = &dynamicBody->transform;
-     Vector2D_t* collider = &dynamicBody->collider;
-     MassiveBody_t* massBody = &dynamicBody->massBody;
-     massiveBodyStopMotion(massBody);
+     /* Getting pointers to player body structs */
+     StaticBody_t* statik = &player->body.statik;
+     RigidBody_t*  rigid  = &player->body.rigid;
 
-     massBody->mass = PLAYER_MASS;
+     /* Initialises rigid body component */
+     rigid->m = PLAYER_MASS;
+     stopRigidMotion(rigid);
+
+     /* Initialises static body component */
+     Vector2D_t* transform = &statik->transform;
+     Vector2D_t* collider  = &statik->collider;
+
      transform->x = PLAYER_START_X_POSITION;
      transform->y = PLAYER_START_Y_POSITION;
-     collider->x = PLAYER_SIZE / 2;
-     collider->y = PLAYER_SIZE / 2;
+     collider->x  = PLAYER_WIDTH  / 2;
+     collider->y  = PLAYER_HEIGHT / 2;
 }
 
 
-void playerReturnToStart(Player_t* player)
-{
+void playerReturnToStart(Player_t* player) {
+     /* Sets to airborne state to avoid potential odd behavior*/
      player->state = AIRBORNE;
-     player->body.transform.x = PLAYER_START_X_POSITION;
-     player->body.transform.y = PLAYER_START_Y_POSITION;
+     player->body.statik.transform.x = PLAYER_START_X_POSITION;
+     player->body.statik.transform.y = PLAYER_START_Y_POSITION;
 }
 
-void playerDeductHealth(Player_t* player, uint8_t penalty)
-{
+void playerDeductHealth(Player_t* player, uint8_t penalty) {
      player->health -= penalty;
 }
 
+void playerStopMotion(Player_t* player) {
+     stopRigidMotion(&player->body.rigid);
+}
 
-void playerJump(Player_t* player)
-{
+void playerJump(Player_t* player) {
      Vector2D_t jumpVector;
      jumpVector.x = FIXED_ZERO;
      jumpVector.y = PLAYER_JUMP_FORCE;
-     massiveBodyApplyForce(&player->body.massBody, jumpVector);
+     applyForce(&player->body.rigid, jumpVector);
+}
+
+void playerSetXVelocity(Player_t* player, Fixed_t v) {
+     player->body.rigid.v.x = v;
 }
 
 
-void playerUpdateMotion(Player_t* player)
-{
-     MassiveBody_t* body = &player->body.massBody;
-     body->velocity.x = INT_TO_FIXED(PLAYER_ROUND_SPEED_SCALE * gameRound);
+void playerUpdateMotion(Player_t* player) {
+     DynamicBody_t* body = &player->body;
+
+     /* WARNING: This statement could lead to bugs (but I like it) 
+        this should potentially be it's own function */
      if (player->state != ONGROUND) {
-          massiveBodyApplyGForce(body);
+          applyGForce(&body->rigid);
      }
-     massiveBodyUpdate(body);
-     massiveBodyClearNetForce(body);
+     /* Runs the dynamic body update routine */
+     updateDynamic(body);
 }
 
-void playerStopMotion(Player_t* player) {
-     massiveBodyStopMotion(&player->body.massBody);
-}
 
 bool isPlayerAlive(Player_t* player) {
      if (player->health <= 0) {

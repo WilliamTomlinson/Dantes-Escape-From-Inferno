@@ -17,12 +17,12 @@ void initBlankStatic(StaticBody_t* statik) {
 
 }
 
-void applyRigidGForce(RigidBody_t* rigid) {
+void applyGForce(RigidBody_t* rigid) {
     rigid->netF.y += INT_TO_FIXED(rigid->m * GRAVITY);
 }
 
 
-void applyRigidForce(RigidBody_t* rigid, Vector2D_t force) {
+void applyForce(RigidBody_t* rigid, Vector2D_t force) {
     rigid->netF.x += force.x;
     rigid->netF.y += force.y;
 }
@@ -77,8 +77,8 @@ void dynamicBodyUpdate(DynamicBody_t* body) {
     RigidBody_t* rigid = &body->rigid;
     StaticBody_t* statik = &body->statik;
     updateRigid(rigid);
-    statik->transform.x += body->rigid.v.x * deltaTime;
-    statik->transform.y += body->rigid.v.y * deltaTime;
+    statik->transform.x += rigid->v.x * deltaTime;
+    statik->transform.y += rigid->v.y * deltaTime;
 }
 
 

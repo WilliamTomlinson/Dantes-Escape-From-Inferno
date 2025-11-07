@@ -41,9 +41,9 @@ typedef enum {
  
 void initBlankStatic(StaticBody_t* statik);
 
-void applyRigidGForce(RigidBody_t* rigid);
+void applyGForce(RigidBody_t* rigid);
 
-void applyRigidForce(RigidBody_t* rigid, Vector2D_t force);
+void applyForce(RigidBody_t* rigid, Vector2D_t force);
 
 void clearRigidNetForce(RigidBody_t* rigid);
 

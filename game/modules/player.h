@@ -19,7 +19,6 @@ typedef enum {
 
 typedef struct {
     uint8_t health;
-    uint8_t roundSpeed;
     PlayerState_t state;
     DynamicBody_t body;
 } Player_t;
