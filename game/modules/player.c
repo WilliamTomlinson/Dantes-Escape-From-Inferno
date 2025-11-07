@@ -5,6 +5,7 @@
 */
 
 #include "player.h"
+#include "math.h"
 
 #define PLAYER_SPEED 1
 #define PLAYER_MASS 1
@@ -77,83 +78,9 @@ void playerStopMotion(Player_t* player) {
      massiveBodyStopMotion(&player->body.massBody);
 }
 
-bool playerBoundaryCheckAndResolver(Player_t* player) 
-{    
-     DynamicBody_t* body = &player->body;
-
-     bool bottom = dynamicBodyBottomBoundaryViolationCheck(body);
-     bool top = dynamicBodyTopBoundaryViolationCheck(body);
-     bool right = dynamicBodyLeftBoundaryViolationCheck(body);
-     if (!(bottom | top | right)) {
-          return false;
-     }
-
-     if (right) {
-          playerStopMotion(player);
-          gameRound++;
-          playerReturnToStart(player);
-     } else if (top | bottom) {
-          playerStopMotion(player);
-          playerDeductHealth(player, PLAYER_OUT_OF_BOUNDS_PENALTY);
-          playerReturnToStart(player);
-     }
-     return true;
-}
-
-void playerCollisionCheckandResolver(Player_t* player) {
-     if (playerOnWorldCollisionCheckAndResolve(player)) {
-          playerStopMotion(player);
-          playerDeductHealth(player, PLAYER_COLLISION_PENALTY);
-          playerReturnToStart(player);
-     }
-}
-
 bool isPlayerAlive(Player_t* player) {
      if (player->health <= 0) {
           return 0;
      }
      return 1;
-}
-
-CollisionSide_t playerOnWorldCollisionCheckAndResolve(Player_t* player)
-{
-     bool isPlayerCollisionFatal = false;
-     const Level_t* currentLevel = returnCurrentLevel();
-     const uint8_t* bitMap = currentLevel->bitMap;
-
-     DynamicBody_t* dynamicBody = &player->body;
-     Vector2D_t*  collider = &dynamicBody->collider;
-     Vector2D_t* centerPosition = &dynamicBody->transform;
-
-     Fixed_t xMin = FIXED_SUB(centerPosition->x, collider->x);
-     Fixed_t xMax = FIXED_ADD(centerPosition->x, collider->x);
-     Fixed_t yMin = FIXED_SUB(centerPosition->y, collider->y);
-     Fixed_t yMax = FIXED_ADD(centerPosition->y, collider->y);
-
-     uint8_t xStartTile = worldToGridIndex(xMin);
-     uint8_t xEndTile   = worldToGridIndex(xMax);
-     uint8_t yStartTile = worldToGridIndex(yMin);
-     uint8_t yEndTile   = worldToGridIndex(yMax);
-
-     StaticBody_t body;
-     StaticBody_t* staticBody = &body;
-     staticBody->transform.x = TILE_SIZE_PIXELS / 2;
-     staticBody->transform.y = TILE_SIZE_PIXELS / 2;
-
-     for (uint8_t ty = yStartTile; ty <= yEndTile; ty++) {
-          for (uint8_t tx = xStartTile; tx <= xEndTile; tx++) {
-               staticBody->transform.x = tx;
-               staticBody->transform.y = ty;
-               if (bitMap[tx] >> ty) {
-                    CollisionSide_t side = dynamicOnStaticBodyCollisionCheck(dynamicBody, staticBody);
-                    if (side == COLLISION_BOTTOM) {
-                    dynamicOnStaticBodyResolveCollision(dynamicBody, staticBody, side);
-                    }
-                    else if (side != COLLISION_NONE) {
-                    isPlayerCollisionFatal = true;
-                    }
-               }
-          }
-     }
-    return isPlayerCollisionFatal;
 }

@@ -10,26 +10,27 @@
 #include "level.h" /* Includes Level_t definition */ 
 #include "physics.h"
 #include "math.h"
+#include "player.h"
 
 #define MAX_STATIC_BODIES 32
 #define TILE_SIZE_PIXELS 8
 
 
 typedef enum {
-    IN_BOUNDS = 0,
-    EXCEEDING_TOP_BOUND,
-    EXCEEDING_BOTTOM_BOUND,
-    EXCEEDING_LEFT_BOUND,
-    EXCEEDING_RIGHT_BOUND
+    NO_VIOLATION,
+    BOTTOM_VIOLATION,
+    TOP_VIOLATION,
+    LEFT_VIOLATION,
+    RIGHT_VIOLATION
 } BoundViolation_t;
 
 extern StaticBody_t* levelGrid[LEVEL_GRID_HEIGHT][MAX_LEVEL_LENGTH];
 
 const Level_t* returnCurrentLevel(void);
 
-void worldLoadLevel(const Level_t* levelData);
+void worldLoadLevel(const Level_t* levelData, Player_t* playerPointer);
 
-uint8_t worldToGridIndex(Fixed_t worldCoord);
+static uint8_t worldToGridIndex(const Fixed_t worldCoord);
 
 bool dynamicBodyBottomBoundaryViolationCheck(const DynamicBody_t* body);
 
