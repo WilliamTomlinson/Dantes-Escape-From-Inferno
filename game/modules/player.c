@@ -98,3 +98,44 @@ bool isPlayerAlive(Player_t* player) {
      }
      return 1;
 }
+
+void playerDeath(Player_t player) {
+
+}
+
+void playerRespawn(Player_t player) {
+
+}
+
+void playerExceedLeftBound(Player_t player) {
+
+}
+
+void playerExceedRightBound(Player_t player) {
+
+}
+
+void playerExceedTopBound(Player_t player) {
+
+}
+
+void playerExceedBottomBound(Player_t player) {
+
+}
+
+void playerLeftCollision(Player_t player) {
+
+}
+
+void playerRightCollision(Player_t player) {
+
+}
+
+void playerTopCollision(Player_t player) {
+
+}
+
+void playerBottomCollision(Player_t player) {
+
+}
+

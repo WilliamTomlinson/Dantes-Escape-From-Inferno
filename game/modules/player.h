@@ -14,7 +14,8 @@
 typedef enum {
     WAIT,
     ONGROUND,
-    AIRBORNE
+    AIRBORNE,
+    DECEASED
 } PlayerState_t;
 
 typedef struct {
