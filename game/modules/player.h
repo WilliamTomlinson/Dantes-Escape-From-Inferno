@@ -9,8 +9,7 @@
 
 #include <system.h>
 #include "physics.h"
-#include "math.h"
-#include "world.h"
+
 
 typedef enum {
     WAIT,

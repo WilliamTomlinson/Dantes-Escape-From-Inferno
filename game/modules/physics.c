@@ -5,8 +5,17 @@
 */
 
 #include "physics.h"
+#include "math.h"
 
 const Fixed_t deltaTime = INT_TO_FIXED(1 / 100);
+
+void initBlankStatic(StaticBody_t* statik) {
+    statik->transform.x = FIXED_ZERO;
+    statik->transform.y = FIXED_ZERO;
+    statik->collider.x  = FIXED_ZERO;
+    statik->collider.y  = FIXED_ZERO;
+
+}
 
 void applyRigidGForce(RigidBody_t* rigid) {
     rigid->netF.y += INT_TO_FIXED(rigid->m * GRAVITY);
@@ -112,7 +121,7 @@ CollisionSide_t collisionCheck(const StaticBody_t* statikA, const StaticBody_t* 
  */
 void collisionResolver(StaticBody_t* statikA, const StaticBody_t* statikB, CollisionSide_t side) {
     /* safety check */
-    if (side == COLLISION_NONE) {
+    if (side == NO_COLLISION) {
         return;
     }
     /* initialising useful data */
@@ -130,23 +139,23 @@ void collisionResolver(StaticBody_t* statikA, const StaticBody_t* statikB, Colli
     // TODO: this does not work properly
 
     switch (side) {
-        case COLLISION_TOP:
+        case TOP_COLLISION:
             combinedHalfHeights = FIXED_ADD(colliderA->y, colliderB->y);
             transformA->y = FIXED_ADD(transformB->y, combinedHalfHeights);
             break;
-        case COLLISION_BOTTOM:
+        case BOTTOM_COLLISION:
             combinedHalfHeights = FIXED_ADD(colliderA->y, colliderB->y);
             transformA->y = FIXED_SUB(transformB->y, combinedHalfHeights);
             break;
-        case COLLISION_RIGHT:
+        case RIGHT_COLLISION:
             combinedHalfWidths = FIXED_ADD(colliderA->x, colliderB->x);
             transformA->x = FIXED_SUB(transformB->x, combinedHalfWidths);
             break;
-        case COLLISION_LEFT:
+        case LEFT_COLLISION:
             combinedHalfWidths = FIXED_ADD(colliderA->x, colliderB->x);
             transformA->x = FIXED_ADD(transformB->x, combinedHalfWidths);
             break;
-        case COLLISION_NONE:
+        case NO_COLLISION:
             break;
     }
 }

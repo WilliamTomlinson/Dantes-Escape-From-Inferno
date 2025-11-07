@@ -17,7 +17,7 @@ static DynamicBody_t* currentPlayer;
 static const Level_t* currentLevel;
 
 
-void worldLoadLevel(const Level_t* levelData, const Player_t* playerPointer)
+void worldLoadLevel(const Level_t* levelData, Player_t* playerPointer)
 {
     currentPlayer = &playerPointer->body;
     currentLevel = levelData;
@@ -26,7 +26,7 @@ void worldLoadLevel(const Level_t* levelData, const Player_t* playerPointer)
 }
 
 
-static uint8_t worldToGridIndex(Fixed_t worldCoord) 
+static uint8_t worldToGridIndex(const Fixed_t worldCoord) 
 {
     const Fixed_t tileSizeFixed = INT_TO_FIXED(TILE_SIZE_PIXELS);
     return FIXED_TO_INT_TRUNC(FIXED_DIV(worldCoord, tileSizeFixed));
@@ -153,7 +153,7 @@ void platformCollisionHandler(void) {
     uint8_t yEndTile   = worldToGridIndex(FIXED_ADD(transform->y, collider->y));
 
     StaticBody_t* tempStatik;
-    // TODO initialise the static body
+    initBlankStatic(tempStatik);
 
     for (uint8_t ty = yStartTile; ty <= yEndTile; ty++) {
         for (uint8_t tx = xStartTile; tx <= xEndTile; tx++) {

@@ -39,6 +39,7 @@ typedef enum {
     RIGHT_COLLISION
 } CollisionSide_t;
  
+void initBlankStatic(StaticBody_t* statik);
 
 void applyRigidGForce(RigidBody_t* rigid);
 

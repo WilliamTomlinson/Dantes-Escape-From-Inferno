@@ -28,9 +28,9 @@ extern StaticBody_t* levelGrid[LEVEL_GRID_HEIGHT][MAX_LEVEL_LENGTH];
 
 const Level_t* returnCurrentLevel(void);
 
-void worldLoadLevel(const Level_t* levelData, const Player_t* playerPointer);
+void worldLoadLevel(const Level_t* levelData, Player_t* playerPointer);
 
-static uint8_t worldToGridIndex(Fixed_t worldCoord);
+static uint8_t worldToGridIndex(const Fixed_t worldCoord);
 
 bool dynamicBodyBottomBoundaryViolationCheck(const DynamicBody_t* body);
 
